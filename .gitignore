@@ -1,0 +1,3 @@
+# CentralChat Infra — gitignore
+# vhosts/ contém repositórios clonados (clone-pull.sh)
+vhosts/

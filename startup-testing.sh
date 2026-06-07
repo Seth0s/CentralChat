@@ -245,7 +245,7 @@ do_health_checks() {
 # ── Status ──────────────────────────────────────────────────
 show_status() {
   echo -e "${BOLD}Status dos containers${NC}"
-  $COMPOSE_CMD ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true
+  $COMPOSE_CMD ps 2>/dev/null || true
 }
 
 # ═════════════════════════════════════════════════════════════

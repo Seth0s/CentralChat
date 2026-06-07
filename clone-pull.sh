@@ -42,10 +42,10 @@ done
 # ── Repositórios ────────────────────────────────────────────
 # Cada entrada: "NOME|URL"
 REPOS=(
-  "CentralChat_Backend|git@github.com:CentralChat/CentralChat_Backend.git"
-  "CentralChat_Frontend|git@github.com:CentralChat/CentralChat_Frontend.git"
-  "CentralChat_CLI|git@github.com:CentralChat/CentralChat_CLI.git"
-  "CentralChat_Desktop|git@github.com:CentralChat/CentralChat_Desktop.git"
+  "CentralChat_Backend|git@github.com:CentralChurch/CentralChat_Backend.git"
+  "CentralChat_Frontend|git@github.com:CentralChurch/CentralChat_Frontend.git"
+  "CentralChat_CLI|git@github.com:CentralChurch/CentralChat_CLI.git"
+  "CentralChat_Desktop|git@github.com:CentralChurch/CentralChat_Desktop.git"
 )
 
 # ── Cores ───────────────────────────────────────────────────
