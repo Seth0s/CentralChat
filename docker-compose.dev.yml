@@ -1,0 +1,120 @@
+# CentralChat — Development (hot-reload)
+#
+#   cd infra && docker compose -f docker-compose.dev.yml up -d --build
+#
+# Com Keycloak OIDC (opcional):
+#   docker compose -f docker-compose.dev.yml --profile oidc up -d --build
+#
+# Hot-reload: altera código → recarrega sozinho. Zero rebuild.
+# NÃO depende de .env na raiz — vars vêm dos .env de cada serviço.
+
+services:
+  # ═══════════════ Init: permissões ═══════════════
+  orchestrator-init:
+    image: docker.io/library/alpine:3.21
+    container_name: central-orchestrator-init
+    restart: unless-stopped
+    user: "0:0"
+    volumes:
+      - ./vhosts/CentralChat_Backend/.central_root:/central:z
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /central/state /central/config
+        chown -R 1000:1000 /central/state /central/config 2>/dev/null || true
+        echo "orchestrator-init: done (idle)"
+        exec tail -f /dev/null
+
+  # ═══════════════ Postgres + pgvector ═══════════════
+  postgres:
+    build:
+      context: ./vhosts/CentralChat_Backend/deploy/postgres
+      dockerfile: Dockerfile
+    image: central-postgres-pgvector:16
+    container_name: central-postgres-test
+    restart: unless-stopped
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - central_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U central -d central_memory
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      default:
+        aliases:
+          - memory-db
+
+  # ═══════════════ Orchestrator (API, hot-reload) ═══════════════
+  orchestrator:
+    build:
+      context: ./vhosts/CentralChat_Backend
+      dockerfile: Dockerfile
+    container_name: central-orchestrator
+    user: "1000:1000"
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    ports:
+      - "8004:8004"
+    depends_on:
+      orchestrator-init:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./vhosts/CentralChat_Backend/.central_root:/central:z
+      - ./vhosts/CentralChat_Backend/app:/app/app:ro,z
+    cap_drop:
+      - ALL
+    command:
+      - sh
+      - -ec
+      - |
+        echo "Central orchestrator (dev) — hot-reload on :8004"
+        exec uvicorn app.server:create_app --factory --host 0.0.0.0 --port 8004 --reload --reload-dir /app/app --log-level info
+
+  # ═══════════════ Web UI (TanStack Start + Bun, hot-reload) ═══════════════
+  centralchat-web:
+    build:
+      context: ./vhosts/CentralChat_Frontend
+      dockerfile: Dockerfile.dev
+    container_name: central-centralchat-web
+    env_file:
+      - ./vhosts/CentralChat_Frontend/.env
+    ports:
+      - "5174:5174"
+    depends_on:
+      - orchestrator
+    restart: unless-stopped
+    volumes:
+      - ./vhosts/CentralChat_Frontend/src:/app/src:ro,z
+      - ./vhosts/CentralChat_Frontend/public:/app/public:ro,z
+      - ./vhosts/CentralChat_Frontend/vite.config.ts:/app/vite.config.ts:ro,z
+
+  # ═══════════════ Keycloak OIDC (opcional — profile: oidc) ═══════════════
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    container_name: central-keycloak-dev
+    restart: unless-stopped
+    profiles:
+      - oidc
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    command: start-dev --import-realm
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./vhosts/CentralChat_Backend/deploy/keycloak/realm-central.json:/opt/keycloak/data/import/realm-central.json:ro,z
+      - ./vhosts/CentralChat_Backend/deploy/keycloak/themes/central:/opt/keycloak/themes/central:ro,z
+
+volumes:
+  central_pg_data:

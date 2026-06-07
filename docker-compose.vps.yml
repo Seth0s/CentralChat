@@ -1,0 +1,61 @@
+# CentralChat — Production (VPS, 2 containers)
+#
+#   cd infra && docker compose -f docker-compose.vps.yml up -d --build
+#
+# Pré-requisitos na VPS:
+#   - PostgreSQL 16 + pgvector nativo no host (MEMORY_DB_URL aponta host.docker.internal)
+#   - Rede infra_net criada: docker network create infra_net
+#   - vhosts/CentralChat_Backend/.env configurado com secrets de produção
+#   - vhosts/CentralChat_Frontend/.env configurado (VITE_ORCHESTRATOR_PROXY_TARGET=http://orchestrator:8004)
+#   - Porta 8004 exposta (orchestrator), porta 5174 (web UI)
+#   - nginx reverso à frente recomendado para ambos
+#
+# NÃO depende de .env na raiz — vars vêm de vhosts/CentralChat_Backend/.env e vhosts/CentralChat_Frontend/.env.
+
+services:
+  # ═══════════════ Orchestrator (API, produção) ═══════════════
+  orchestrator:
+    build:
+      context: ./vhosts/CentralChat_Backend
+      dockerfile: Dockerfile
+    container_name: central-orchestrator
+    restart: unless-stopped
+    user: "1000:1000"
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    ports:
+      - "8004:8004"
+    volumes:
+      - /srv/projects/CentralChat/infra/vhosts/CentralChat_Backend/.central_root:/central:z
+    cap_drop:
+      - ALL
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - infra_net
+    command:
+      - sh
+      - -ec
+      - |
+        echo "Central orchestrator (production) — starting..."
+        exec uvicorn app.server:create_app --factory --host 0.0.0.0 --port 8004 --workers 4 --log-level warning
+
+  # ═══════════════ Web UI (TanStack Start, produção) ═══════════════
+  centralchat-web:
+    build:
+      context: ./vhosts/CentralChat_Frontend
+      dockerfile: Dockerfile
+    container_name: central-centralchat-web
+    restart: unless-stopped
+    env_file:
+      - ./vhosts/CentralChat_Frontend/.env
+    ports:
+      - "5174:5174"
+    depends_on:
+      - orchestrator
+    networks:
+      - infra_net
+
+networks:
+  infra_net:
+    external: true
