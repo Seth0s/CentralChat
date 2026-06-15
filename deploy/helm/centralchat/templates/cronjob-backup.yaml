@@ -1,0 +1,58 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "centralchat.fullname" . }}-pg-backup
+  labels:
+    {{- include "centralchat.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: backup
+          image: {{ .Values.backup.image }}
+          envFrom:
+            {{- if .Values.secrets.existingSecret }}
+            - secretRef:
+                name: {{ .Values.secrets.existingSecret }}
+            {{- else }}
+            - secretRef:
+                name: {{ include "centralchat.fullname" . }}-secret
+            {{- end }}
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  mkdir -p /backup
+                  export BACKUP_DIR=/backup RETENTION_DAYS={{ .Values.backup.retentionDays }}
+                  /scripts/pg_backup.sh
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+                - name: scripts
+                  mountPath: /scripts
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "centralchat.fullname" . }}-backup
+            - name: scripts
+              configMap:
+                name: {{ include "centralchat.fullname" . }}-backup-scripts
+                defaultMode: 0755
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "centralchat.fullname" . }}-backup
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+{{- end }}

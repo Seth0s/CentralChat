@@ -1,0 +1,9 @@
+# Prometheus scrape config for local staging (Compose network)
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: centralchat-orchestrator
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["orchestrator:8004"]

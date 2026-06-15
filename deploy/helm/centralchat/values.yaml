@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: centralchat/orchestrator
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8004
+
+ingress:
+  enabled: false
+  className: ""
+  hosts:
+    - host: centralchat.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# Chart ConfigMap / Secret (templates/configmap.yaml, secret.yaml)
+central:
+  jwtSecret: "change-me-in-production-min-32-chars"
+  telemetryDisabled: false
+  airGapMode: false
+  dataResidency: "br"
+  llmEndpointRegion: "br"
+  breakGlassTtlHours: "1"
+  dlpEnabled: true
+  corsAllowOrigins: "http://localhost:5174"
+  env:
+    CENTRAL_APP_ENV: staging
+    CENTRAL_JWT_MODE: required
+    CENTRAL_JSON_LOGGING: "1"
+    CENTRAL_QUOTA_ENABLED: "1"
+    CENTRAL_AUDIT_RETENTION_DAYS: "365"
+
+# Optional external secret (overrides chart secret for MEMORY_DB_URL in prod)
+secrets:
+  existingSecret: ""
+  # When set, e.g. centralchat-secrets — create with kubectl before install
+
+postgres:
+  enabled: false
+  host: postgres
+  port: 5432
+  user: central
+  password: changeme
+  database: central_memory
+  image: postgres:16-alpine
+  storage: 10Gi
+
+backup:
+  enabled: true
+  schedule: "0 * * * *"
+  retentionDays: 7
+  image: postgres:16-alpine
+
+prometheus:
+  scrape: true
+  path: /metrics
+
+grafana:
+  dashboardConfigMap: centralchat-grafana-dashboard

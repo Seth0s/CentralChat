@@ -1,0 +1,29 @@
+name: CLI release
+
+on:
+  push:
+    tags:
+      - "cli/v*"
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: vhosts/CentralChat_CLI
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: vhosts/CentralChat_CLI/go.sum
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          working_directory: vhosts/CentralChat_CLI
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

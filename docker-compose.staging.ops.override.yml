@@ -1,0 +1,37 @@
+# Onda D — staging ops: alert webhook sink + Prometheus (local only)
+#
+#   docker compose -f docker-compose.dev.yml \
+#     -f docker-compose.e2e.override.yml \
+#     -f docker-compose.staging.override.yml \
+#     -f docker-compose.staging.ops.override.yml up -d
+#
+# Webhook sink logs: docker compose ... logs -f alert-webhook-sink
+# Prometheus UI:     http://127.0.0.1:9090
+
+services:
+  orchestrator:
+    environment:
+      CENTRAL_ALERT_WEBHOOK_URL: http://alert-webhook-sink:9080/hooks/ops
+      # Para testar Slack format no mesmo sink:
+      CENTRAL_ALERT_SLACK_WEBHOOK_URL: http://alert-webhook-sink:9080/hooks/slack
+
+  alert-webhook-sink:
+    image: docker.io/library/python:3.12-alpine
+    container_name: central-alert-webhook-sink
+    restart: unless-stopped
+    volumes:
+      - ./scripts/alert_webhook_sink.py:/sink.py:ro,z
+    command: ["python", "/sink.py", "9080"]
+    ports:
+      - "127.0.0.1:9080:9080"
+
+  prometheus:
+    image: docker.io/prom/prometheus:v2.55.0
+    container_name: central-prometheus-staging
+    restart: unless-stopped
+    volumes:
+      - ./deploy/prometheus/prometheus.compose.yml:/etc/prometheus/prometheus.yml:ro,z
+    ports:
+      - "127.0.0.1:9090:9090"
+    depends_on:
+      - orchestrator

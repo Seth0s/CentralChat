@@ -73,6 +73,9 @@ services:
     volumes:
       - ./vhosts/CentralChat_Backend/.central_root:/central:z
       - ./vhosts/CentralChat_Backend/app:/app/app:ro,z
+      - ./vhosts/CentralChat_Backend/scripts:/app/scripts:ro,z
+      # Repo root no container (git metadata server-side); CLI pode usar path do host
+      - .:/workspace:rw,z
     cap_drop:
       - ALL
     command:
@@ -90,6 +93,8 @@ services:
     container_name: central-centralchat-web
     env_file:
       - ./vhosts/CentralChat_Frontend/.env
+    environment:
+      VITE_ADMIN_URL: http://127.0.0.1:5175
     ports:
       - "5174:5174"
     depends_on:
@@ -99,6 +104,24 @@ services:
       - ./vhosts/CentralChat_Frontend/src:/app/src:ro,z
       - ./vhosts/CentralChat_Frontend/public:/app/public:ro,z
       - ./vhosts/CentralChat_Frontend/vite.config.ts:/app/vite.config.ts:ro,z
+
+  # ═══════════════ Admin UI (dashboard supervisão) ═══════════════
+  centralchat-admin:
+    build:
+      context: ./vhosts/centralchat_admin
+      dockerfile: Dockerfile.dev
+    container_name: central-centralchat-admin
+    env_file:
+      - ./vhosts/centralchat_admin/.env
+    ports:
+      - "5175:5175"
+    depends_on:
+      - orchestrator
+    restart: unless-stopped
+    volumes:
+      - ./vhosts/centralchat_admin/src:/app/src:ro,z
+      - ./vhosts/centralchat_admin/public:/app/public:ro,z
+      - ./vhosts/centralchat_admin/vite.config.ts:/app/vite.config.ts:ro,z
 
   # ═══════════════ Keycloak OIDC (opcional — profile: oidc) ═══════════════
   keycloak:

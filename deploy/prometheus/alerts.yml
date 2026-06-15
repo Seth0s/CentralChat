@@ -1,0 +1,47 @@
+groups:
+  - name: centralchat
+    rules:
+      - alert: CentralChatBreakGlassUsed
+        expr: increase(central_approvals_total{resolution="approved"}[5m]) >= 0 and on() vector(1)
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Break-glass or approval spike — check audit"
+          description: "Review audit for break_glass.used events (wired via webhook on use)."
+
+      - alert: CentralChatQuota90
+        expr: central_quota_monthly_pct > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tenant quota above 90%"
+          description: "Monthly token quota exceeded 90% threshold."
+
+      - alert: CentralChatSiemDeadLetter
+        expr: central_siem_outbox_dead_total > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "SIEM outbox dead-letter rows"
+          description: "Run siem_worker and inspect siem_outbox status=dead."
+
+      - alert: CentralChatStreamErrors
+        expr: rate(central_streams_total{status="error"}[15m]) / rate(central_streams_total[15m]) > 0.02
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stream error rate above 2% (SLO 98%)"
+          description: "Check orchestrator logs and model-router health."
+
+      - alert: CentralChatApi5xx
+        expr: rate(central_http_requests_total{status=~"5.."}[5m]) / rate(central_http_requests_total[5m]) > 0.005
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 5xx rate above 0.5% (SLO 99.5%)"
+          description: "Check /health/ready and Postgres connectivity."

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "centralchat.fullname" . }}-config
+  labels:
+    {{- include "centralchat.labels" . | nindent 4 }}
+data:
+  CENTRAL_TELEMETRY_DISABLED: {{ ternary "1" "0" .Values.central.telemetryDisabled | quote }}
+  CENTRAL_AIR_GAP_MODE: {{ ternary "1" "0" .Values.central.airGapMode | quote }}
+  CENTRAL_DATA_RESIDENCY: {{ .Values.central.dataResidency | quote }}
+  CENTRAL_LLM_ENDPOINT_REGION: {{ .Values.central.llmEndpointRegion | quote }}
+  CENTRAL_BREAK_GLASS_TTL_HOURS: {{ .Values.central.breakGlassTtlHours | quote }}
+  CENTRAL_DLP_ENABLED: {{ ternary "1" "0" .Values.central.dlpEnabled | quote }}
+  CENTRAL_CORS_ALLOW_ORIGINS: {{ .Values.central.corsAllowOrigins | quote }}
+  API_HOST: "0.0.0.0"
+  API_PORT: {{ .Values.service.port | quote }}
+  {{- range $k, $v := .Values.central.env }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- if .Values.postgres.enabled }}
+  CENTRAL_MEMORY_DB_DSN: "postgresql://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}"
+  {{- end }}

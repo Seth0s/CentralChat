@@ -1,0 +1,44 @@
+{
+  "title": "CentralChat Ops",
+  "uid": "centralchat-ops",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active streams",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "central_streams_active", "legendFormat": "streams" }]
+    },
+    {
+      "type": "graph",
+      "title": "Approvals / 5m",
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 },
+      "targets": [{ "expr": "rate(central_approvals_total[5m])", "legendFormat": "{{resolution}}" }]
+    },
+    {
+      "type": "graph",
+      "title": "Policy violations / 5m",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "rate(central_policy_violations_total[5m])", "legendFormat": "{{error_code}}" }]
+    },
+    {
+      "type": "stat",
+      "title": "SIEM dead letters",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
+      "targets": [{ "expr": "central_siem_outbox_dead_total" }]
+    },
+    {
+      "type": "graph",
+      "title": "HTTP 5xx rate",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(central_http_requests_total{status=~\"5..\"}[5m]) / rate(central_http_requests_total[5m])",
+          "legendFormat": "5xx ratio"
+        }
+      ]
+    }
+  ]
+}
