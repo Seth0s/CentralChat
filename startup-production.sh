@@ -159,47 +159,6 @@ health_with_retry() {
   return 1
 }
 
-# ── Migrations ──────────────────────────────────────────────
-do_migrate() {
-  echo -e "${BOLD}Rodando migrations...${NC}"
-
-  # Executa run_migrations.py dentro do container orchestrator
-  local MAX=10 INTERVAL=5
-  for ((i=1; i<=MAX; i++)); do
-    if docker exec central-orchestrator python scripts/run_migrations.py 2>&1; then
-      echo -e "  ${OK} Migrations concluídas"
-      return 0
-    fi
-    echo -e "  ${WARN} Tentativa ${i}/${MAX} — aguardando DB..."
-    read -rt "$INTERVAL" <> <(:) 2>/dev/null || true
-  done
-
-  echo -e "  ${ERR} Migrations falharam após $((MAX * INTERVAL))s"
-  return 1
-}
-
-# ── Seed auth user ──────────────────────────────────────────
-do_seed() {
-  echo -e "${BOLD}Verificando seed do utilizador...${NC}"
-
-  local MAX=5 INTERVAL=3
-  for ((i=1; i<=MAX; i++)); do
-    if docker exec central-orchestrator python -c "
-from app.auth import upsert_user
-upsert_user(email='dev@local.test', password='changeme', client_id='default')
-print('User seeded')
-" 2>&1; then
-      echo -e "  ${OK} Utilizador padrão verificado"
-      return 0
-    fi
-    echo -e "  ${WARN} Tentativa ${i}/${MAX}..."
-    read -rt "$INTERVAL" <> <(:) 2>/dev/null || true
-  done
-
-  echo -e "  ${WARN} Seed falhou (pode já ter sido executado)"
-  return 0  # non-fatal
-}
-
 # ── Startup ─────────────────────────────────────────────────
 do_startup() {
   cd "$CC_ROOT" || die "Não foi possível aceder a ${CC_ROOT}"
@@ -273,8 +232,6 @@ fi
 
 check_prereqs
 do_startup
-do_migrate
-do_seed
 show_status
 echo ""
 do_health_checks

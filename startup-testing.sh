@@ -5,7 +5,8 @@
 #
 # Sobe a stack de desenvolvimento com Docker Compose:
 #   postgres (pgvector 16), orchestrator (FastAPI), centralchat-web (TanStack Start)
-# Após o up, corre migrations e seed do utilizador dev (dev@local.test / changeme).
+# Após o up, migrate + bootstrap root (se vazio) + seed e2e correm no entrypoint
+# do orchestrator (CENTRAL_DEV_SEED=1 no compose dev).
 #
 # Uso:
 #   cd infra && ./startup-testing.sh               # build + up + health
@@ -216,49 +217,6 @@ do_startup() {
   echo ""
 }
 
-# ── Migrations ──────────────────────────────────────────────
-do_migrate() {
-  echo -e "${BOLD}Rodando migrations...${NC}"
-
-  local MAX=10 INTERVAL=5
-  for ((i=1; i<=MAX; i++)); do
-    if docker exec central-orchestrator python scripts/run_migrations.py 2>&1; then
-      echo -e "  ${OK} Migrations concluídas"
-      return 0
-    fi
-    echo -e "  ${WARN} Tentativa ${i}/${MAX} — aguardando DB..."
-    read -rt "$INTERVAL" <> <(:) 2>/dev/null || true
-  done
-
-  echo -e "  ${ERR} Migrations falharam após $((MAX * INTERVAL))s"
-  return 1
-}
-
-# ── Seed auth user ──────────────────────────────────────────
-do_seed() {
-  echo -e "${BOLD}Verificando seed do utilizador...${NC}"
-
-  local MAX=5 INTERVAL=3
-  for ((i=1; i<=MAX; i++)); do
-    if docker exec central-orchestrator python -c "
-from app.auth import upsert_user
-upsert_user(email='dev@local.test', password='changeme', client_id='default')
-print('User seeded')
-" 2>&1; then
-      echo -e "  ${OK} Utilizador padrão: dev@local.test / changeme"
-      if docker exec central-orchestrator python scripts/seed_e2e_users.py 2>&1; then
-        echo -e "  ${OK} Utilizadores e2e (dev, approver, viewer, auditor)"
-      fi
-      return 0
-    fi
-    echo -e "  ${WARN} Tentativa ${i}/${MAX}..."
-    read -rt "$INTERVAL" <> <(:) 2>/dev/null || true
-  done
-
-  echo -e "  ${WARN} Seed falhou (orquestrador pode ainda não estar pronto)"
-  return 0  # non-fatal
-}
-
 # ── Health checks ───────────────────────────────────────────
 do_health_checks() {
   echo -e "${BOLD}Health checks${NC}"
@@ -267,7 +225,7 @@ do_health_checks() {
   # postgres (Docker healthcheck: pg_isready)
   wait_docker_health "central-postgres-test" "PostgreSQL" || ((FAILS++))
 
-  # orchestrator (FastAPI — demora mais por causa de migrate)
+  # orchestrator (FastAPI — aguarda migrate via depends_on no compose)
   health_with_retry "Orchestrator" "http://127.0.0.1:8004/health" || ((FAILS++))
   health_with_retry "Orchestrator ready" "http://127.0.0.1:8004/health/ready" || ((FAILS++))
 
@@ -307,8 +265,6 @@ fi
 bootstrap_env
 check_prereqs
 do_startup
-do_migrate
-do_seed
 show_status
 echo ""
 do_health_checks

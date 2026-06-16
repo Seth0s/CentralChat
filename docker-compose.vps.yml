@@ -2,6 +2,8 @@
 #
 #   cd infra && docker compose -f docker-compose.vps.yml up -d --build
 #
+# Migrações: entrypoint do orchestrator antes do uvicorn.
+#
 # Pré-requisitos na VPS:
 #   - PostgreSQL 16 + pgvector nativo no host (MEMORY_DB_URL aponta host.docker.internal)
 #   - Rede infra_net criada: docker network create infra_net
@@ -13,6 +15,24 @@
 # NÃO depende de .env na raiz — vars vêm de vhosts/CentralChat_Backend/.env e vhosts/CentralChat_Frontend/.env.
 
 services:
+  # ═══════════════ DB migrations (opcional — profile tools) ═══════════════
+  migrate:
+    profiles:
+      - tools
+    build:
+      context: ./vhosts/CentralChat_Backend
+      dockerfile: Dockerfile
+    image: central-orchestrator-migrate:prod
+    restart: "no"
+    user: "1000:1000"
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - infra_net
+    entrypoint: ["python", "scripts/run_migrations.py"]
+
   # ═══════════════ Orchestrator (API, produção) ═══════════════
   orchestrator:
     build:
@@ -34,11 +54,17 @@ services:
     networks:
       - infra_net
     command:
-      - sh
-      - -ec
-      - |
-        echo "Central orchestrator (production) — starting..."
-        exec uvicorn app.server:create_app --factory --host 0.0.0.0 --port 8004 --workers 4 --log-level warning
+      - uvicorn
+      - app.server:create_app
+      - --factory
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8004"
+      - --workers
+      - "4"
+      - --log-level
+      - warning
 
   # ═══════════════ Web UI (TanStack Start, produção) ═══════════════
   centralchat-web:

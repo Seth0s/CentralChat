@@ -1,5 +1,16 @@
 replicaCount: 1
 
+migrations:
+  enabled: true
+  backoffLimit: 3
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
 image:
   repository: centralchat/orchestrator
   tag: latest

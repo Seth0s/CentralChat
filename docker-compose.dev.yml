@@ -5,6 +5,9 @@
 # Com Keycloak OIDC (opcional):
 #   docker compose -f docker-compose.dev.yml --profile oidc up -d --build
 #
+# Migrações: entrypoint do orchestrator (run_migrations.py) antes do uvicorn.
+# Migração manual isolada: docker compose -f docker-compose.dev.yml --profile tools run --rm migrate
+#
 # Hot-reload: altera código → recarrega sozinho. Zero rebuild.
 # NÃO depende de .env na raiz — vars vêm dos .env de cada serviço.
 
@@ -53,6 +56,23 @@ services:
         aliases:
           - memory-db
 
+  # ═══════════════ DB migrations (opcional — profile tools) ═══════════════
+  migrate:
+    profiles:
+      - tools
+    build:
+      context: ./vhosts/CentralChat_Backend
+      dockerfile: Dockerfile
+    image: central-orchestrator-migrate:dev
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    volumes:
+      - ./vhosts/CentralChat_Backend/migrations:/app/migrations:ro,z
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["python", "scripts/run_migrations.py"]
+
   # ═══════════════ Orchestrator (API, hot-reload) ═══════════════
   orchestrator:
     build:
@@ -62,6 +82,8 @@ services:
     user: "1000:1000"
     env_file:
       - ./vhosts/CentralChat_Backend/.env
+    environment:
+      CENTRAL_DEV_SEED: "1"
     ports:
       - "8004:8004"
     depends_on:
@@ -74,16 +96,23 @@ services:
       - ./vhosts/CentralChat_Backend/.central_root:/central:z
       - ./vhosts/CentralChat_Backend/app:/app/app:ro,z
       - ./vhosts/CentralChat_Backend/scripts:/app/scripts:ro,z
-      # Repo root no container (git metadata server-side); CLI pode usar path do host
+      - ./vhosts/CentralChat_Backend/migrations:/app/migrations:ro,z
       - .:/workspace:rw,z
     cap_drop:
       - ALL
     command:
-      - sh
-      - -ec
-      - |
-        echo "Central orchestrator (dev) — hot-reload on :8004"
-        exec uvicorn app.server:create_app --factory --host 0.0.0.0 --port 8004 --reload --reload-dir /app/app --log-level info
+      - uvicorn
+      - app.server:create_app
+      - --factory
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8004"
+      - --reload
+      - --reload-dir
+      - /app/app
+      - --log-level
+      - info
 
   # ═══════════════ Web UI (TanStack Start + Bun, hot-reload) ═══════════════
   centralchat-web:
