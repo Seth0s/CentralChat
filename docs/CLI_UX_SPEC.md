@@ -1,9 +1,9 @@
 # CentralChat CLI — Especificação de UX (TUI)
 
-> **UPDATED:** 2026-06-15 (§18 Markdown chat · §15 Plan Canvas · §16 P4 polish)  
+> **UPDATED:** 2026-06-18  
 > **Status:** Canónico para redesign do CLI (`vhosts/CentralChat_CLI`)  
 > **Audiência:** produto, engenharia CLI  
-> **Relacionado:** `docs/RUNBOOK_STAGING.md`, web `LoginPage`, dashboard TanStack
+> **Relacionado:** `docs/CLI_RUNTIME_MODES.md` (modos TEAM/SOLO), `docs/RUNBOOK_STAGING.md`, web `LoginPage`, dashboard TanStack
 
 ---
 
@@ -19,6 +19,7 @@
 | 2026-06-15 | §18 P2: tema Central JSON (Glamour), blocos incrementais no streaming |
 | 2026-06-15 | §18 Markdown no chat (Glamour P1): pipeline, cache, streaming plain, env off |
 | 2026-06-15 | §15 Plan Canvas (3 caminhos P5) · §16 P4 polish visual (OpenCode-inspired) |
+| 2026-06-18 | Referência `CLI_RUNTIME_MODES.md`; TEAM funde daemon em AgentRuntime; SOLO skip login |
 
 ---
 

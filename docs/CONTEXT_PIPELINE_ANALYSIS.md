@@ -1,6 +1,7 @@
 # CentralChat — Pipeline de Contexto Atual
 
-> Análise completa para discussão de otimização. 2026-06-08.
+> Análise completa para discussão de otimização. 2026-06-08.  
+> **UPDATED:** 2026-06-18 — estado alvo e checklists em [`CONTEXT_AND_AGENT_PLATFORM_PLAN.md`](./CONTEXT_AND_AGENT_PLATFORM_PLAN.md).
 
 ---
 

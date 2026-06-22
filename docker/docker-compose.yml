@@ -1,0 +1,34 @@
+# CentralChat — Browser-Use sidecar
+# Provides web_search via headless browser.
+# No API keys in this file — keys stay on the host.
+#
+# Usage:
+#   docker compose up -d
+#   curl -X POST http://localhost:8081/search -H 'Content-Type: application/json' -d '{"query":"test","limit":3}'
+
+version: "3.8"
+
+services:
+  browser-use:
+    build: ./browser-use
+    image: centralchat/browser-use:latest
+    container_name: centralchat-browser-use
+    ports:
+      - "127.0.0.1:8081:8081"  # localhost only — no external access
+    restart: unless-stopped
+    # Mount a volume for browser profiles (optional, speeds up repeated searches)
+    volumes:
+      - browser-data:/root/.browser-use
+    environment:
+      - BROWSER_USE_HOST=0.0.0.0
+      - BROWSER_USE_PORT=8081
+      # LLM API key is passed by centralchat at runtime, not stored here
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2"
+
+volumes:
+  browser-data:

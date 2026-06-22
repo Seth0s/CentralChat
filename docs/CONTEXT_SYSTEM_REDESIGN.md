@@ -1,6 +1,7 @@
 # CentralChat — Sistema de Contexto: Atual vs Proposto
 
-> Documento de design com plano de implementação em fases. 2026-06-08.
+> Documento de design com plano de implementação em fases. 2026-06-08.  
+> **UPDATED:** 2026-06-18 — plano de execução e decisões consolidadas em [`CONTEXT_AND_AGENT_PLATFORM_PLAN.md`](./CONTEXT_AND_AGENT_PLATFORM_PLAN.md) (fonte de verdade).
 
 ---
 

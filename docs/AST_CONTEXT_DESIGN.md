@@ -1,6 +1,7 @@
 # CentralChat AST — Documento de Design
 
-> Brainstorm 2026-06-08. Status: **exploração arquitetural**. Nada implementado.
+> Brainstorm 2026-06-08. Status: **exploração arquitetural** — implementação H4.  
+> **UPDATED:** 2026-06-18 — decisões e roadmap integrados em [`CONTEXT_AND_AGENT_PLATFORM_PLAN.md`](./CONTEXT_AND_AGENT_PLATFORM_PLAN.md) §10 e §15.
 
 ## Decisão de escopo (2026-06-08)
 

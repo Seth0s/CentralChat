@@ -523,8 +523,11 @@ O hardening considera-se **concluído** quando todos os itens abaixo estão marc
 |-----------|---------|
 | `MVP_REPOSITIONING.md` | Fases H0–H3; checklist §18 |
 | `docs/RUNBOOK_STAGING.md` | Arranque staging — Onda A3.5 |
-| `CONTEXT_SYSTEM_REDESIGN.md` | Pipeline contexto — Onda B |
-| `AST_CONTEXT_DESIGN.md` | Congelado — H4 (D-AST-1) |
+| `CLI_RUNTIME_MODES.md` | **Canónico** — TEAM híbrido + SOLO; InferencePlan; WebSocket |
+| `CONTEXT_AND_AGENT_PLATFORM_PLAN.md` | Context engine, WI, multi-dev |
+| `CONTEXT_SECURITY_AND_TRUST.md` | Trust L5, precedência, CQS, fuzz CI |
+| `CONTEXT_SYSTEM_REDESIGN.md` | Design inicial pipeline — ver plano canónico |
+| `AST_CONTEXT_DESIGN.md` | Congelado — H4 (D-AST-1); ver plano canónico §10 |
 | `deploy/helm/centralchat/` | Helm air-gap — Onda D |
 
 ---
