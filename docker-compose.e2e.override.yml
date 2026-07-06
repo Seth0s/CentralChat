@@ -1,8 +1,0 @@
-services:
-  orchestrator:
-    environment:
-      CENTRAL_JWT_MODE: required
-      AUTH_LOGIN_ENABLED: "1"
-      CENTRAL_APP_ENV: development
-      AUTH_LOGIN_RATE_LIMIT_PER_WINDOW: "10000"
-      AUTH_LOGIN_RATE_LIMIT_WINDOW_SECONDS: "60"

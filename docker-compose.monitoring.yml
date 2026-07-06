@@ -1,18 +1,16 @@
-# Onda D — staging ops: alert webhook sink + Prometheus (local only)
+# CentralChat — Monitoring (override para docker-compose.dev.yml)
 #
-#   docker compose -f docker-compose.dev.yml \
-#     -f docker-compose.e2e.override.yml \
-#     -f docker-compose.staging.override.yml \
-#     -f docker-compose.staging.ops.override.yml up -d
+#   docker compose -f docker-compose.dev.yml -f docker-compose.monitoring.yml up -d --build
 #
-# Webhook sink logs: docker compose ... logs -f alert-webhook-sink
-# Prometheus UI:     http://127.0.0.1:9090
+# Adiciona Prometheus + webhook sink de alertas. Útil para staging local e testes de observabilidade.
+#
+# Prometheus UI: http://127.0.0.1:9090
+# Webhook sink logs: docker compose -f docker-compose.dev.yml -f docker-compose.monitoring.yml logs -f alert-webhook-sink
 
 services:
   orchestrator:
     environment:
       CENTRAL_ALERT_WEBHOOK_URL: http://alert-webhook-sink:9080/hooks/ops
-      # Para testar Slack format no mesmo sink:
       CENTRAL_ALERT_SLACK_WEBHOOK_URL: http://alert-webhook-sink:9080/hooks/slack
 
   alert-webhook-sink:
@@ -27,7 +25,7 @@ services:
 
   prometheus:
     image: docker.io/prom/prometheus:v2.55.0
-    container_name: central-prometheus-staging
+    container_name: central-prometheus
     restart: unless-stopped
     volumes:
       - ./deploy/prometheus/prometheus.compose.yml:/etc/prometheus/prometheus.yml:ro,z

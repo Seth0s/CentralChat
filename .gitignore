@@ -47,3 +47,6 @@ postgres-data/
 # Binaries
 central
 *.exe
+
+# Internal docs (not part of the public repo)
+docs/

@@ -1,12 +1,10 @@
 # CentralChat — Development (hot-reload)
 #
-#   cd infra && docker compose -f docker-compose.dev.yml up -d --build
+#   docker compose -f docker-compose.dev.yml up -d --build
 #
-# Com Keycloak OIDC (opcional):
-#   docker compose -f docker-compose.dev.yml --profile oidc up -d --build
-#
-# Migrações: entrypoint do orchestrator (run_migrations.py) antes do uvicorn.
-# Migração manual isolada: docker compose -f docker-compose.dev.yml --profile tools run --rm migrate
+# Com OIDC:   docker compose -f docker-compose.dev.yml -f docker-compose.oidc.yml up -d --build
+# Com monitoring: docker compose -f docker-compose.dev.yml -f docker-compose.monitoring.yml up -d --build
+# Migração manual: docker compose -f docker-compose.dev.yml --profile tools run --rm migrate
 #
 # Hot-reload: altera código → recarrega sozinho. Zero rebuild.
 # NÃO depende de .env na raiz — vars vêm dos .env de cada serviço.
@@ -56,7 +54,7 @@ services:
         aliases:
           - memory-db
 
-  # ═══════════════ DB migrations (opcional — profile tools) ═══════════════
+  # ═══════════════ DB migrations (profile: tools) ═══════════════
   migrate:
     profiles:
       - tools
@@ -152,21 +150,25 @@ services:
       - ./vhosts/centralchat_admin/public:/app/public:ro,z
       - ./vhosts/centralchat_admin/vite.config.ts:/app/vite.config.ts:ro,z
 
-  # ═══════════════ Keycloak OIDC (opcional — profile: oidc) ═══════════════
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0.7
-    container_name: central-keycloak-dev
-    restart: unless-stopped
+  # ═══════════════ Browser-Use sidecar (profile: browser) ═══════════════
+  browser-use:
     profiles:
-      - oidc
-    env_file:
-      - ./vhosts/CentralChat_Backend/.env
-    command: start-dev --import-realm
+      - browser
+    build:
+      context: ./vhosts/CentralChat_Backend/deploy/browser-use
+    image: centralchat/browser-use:latest
+    container_name: centralchat-browser-use
     ports:
-      - "127.0.0.1:8180:8080"
-    volumes:
-      - ./vhosts/CentralChat_Backend/deploy/keycloak/realm-central.json:/opt/keycloak/data/import/realm-central.json:ro,z
-      - ./vhosts/CentralChat_Backend/deploy/keycloak/themes/central:/opt/keycloak/themes/central:ro,z
+      - "127.0.0.1:8081:8081"
+    restart: unless-stopped
+    environment:
+      BROWSER_USE_HOST: "0.0.0.0"
+      BROWSER_USE_PORT: "8081"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2"
 
 volumes:
   central_pg_data:

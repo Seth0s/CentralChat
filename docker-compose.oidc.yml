@@ -1,0 +1,33 @@
+# CentralChat — Keycloak OIDC (override para docker-compose.dev.yml)
+#
+#   docker compose -f docker-compose.dev.yml -f docker-compose.oidc.yml up -d --build
+#
+# Adiciona container Keycloak + variáveis OIDC no orchestrator e frontend.
+
+services:
+  orchestrator:
+    environment:
+      CENTRAL_OIDC_ENABLED: "1"
+      CENTRAL_OIDC_ISSUER_URL: http://localhost:8180/realms/central
+      CENTRAL_OIDC_HTTP_BASE: http://central-keycloak-dev:8080
+      CENTRAL_OIDC_CLIENT_ID: central-bff
+      CENTRAL_OIDC_CLIENT_SECRET: central-bff-secret-dev-only
+      CENTRAL_OIDC_REDIRECT_URIS: "http://localhost:5174/oidc-callback,http://127.0.0.1:5174/oidc-callback"
+      CENTRAL_OIDC_GROUP_ROLE_MAP: '{"central-developers":"developer","central-approvers":"approver","central-admins":"admin","central-auditors":"auditor","central-viewers":"viewer"}'
+      CENTRAL_APPROVAL_SEPARATION: "1"
+
+  centralchat-web:
+    environment:
+      VITE_ORCHESTRATOR_PROXY_TARGET: http://orchestrator:8004
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    container_name: central-keycloak-dev
+    restart: unless-stopped
+    env_file:
+      - ./vhosts/CentralChat_Backend/.env
+    command: start-dev --import-realm
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./vhosts/CentralChat_Backend/deploy/keycloak/realm-central.json:/opt/keycloak/data/import/realm-central.json:ro,z
