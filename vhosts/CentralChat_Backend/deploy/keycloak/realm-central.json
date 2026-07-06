@@ -1,0 +1,116 @@
+{
+  "realm": "central",
+  "loginTheme": "central",
+  "enabled": true,
+  "internationalizationEnabled": true,
+  "defaultLocale": "pt-BR",
+  "supportedLocales": ["pt-BR", "pt", "en"],
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "groups": [
+    { "name": "central-developers", "path": "/central-developers" },
+    { "name": "central-approvers", "path": "/central-approvers" },
+    { "name": "central-admins", "path": "/central-admins" },
+    { "name": "central-auditors", "path": "/central-auditors" },
+    { "name": "central-viewers", "path": "/central-viewers" }
+  ],
+  "clients": [
+    {
+      "clientId": "central-bff",
+      "name": "Central BFF (confidential + PKCE)",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "central-bff-secret-dev-only",
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://127.0.0.1:5173/*",
+        "http://localhost:5174/oidc-callback",
+        "http://127.0.0.1:5174/oidc-callback",
+        "http://localhost:5174/*",
+        "http://127.0.0.1:5174/*"
+      ],
+      "webOrigins": ["+"],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "client_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "client_id",
+            "claim.name": "client_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "groups",
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "dev",
+      "email": "dev@local.test",
+      "firstName": "Dev",
+      "lastName": "Local",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["/central-developers"],
+      "attributes": {
+        "client_id": ["default"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeme",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "approver",
+      "email": "approver@local.test",
+      "firstName": "Approver",
+      "lastName": "Local",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["/central-approvers"],
+      "attributes": {
+        "client_id": ["default"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeme",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

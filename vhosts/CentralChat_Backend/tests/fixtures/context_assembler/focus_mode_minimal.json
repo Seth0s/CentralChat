@@ -1,0 +1,24 @@
+{
+  "history": [
+    {
+      "role": "system",
+      "content": "[SYSTEM]\n[SYS_ENV]\nID: Central\nUser: Lucas\nPrivilege: user\nOS: {os.type()} ({os.release()})\nPWD: home/lucas/Workplace/Projects/central\nDate: 29/04/2026\nPersona: Technical Guardian"
+    }
+  ],
+  "meta": {
+    "pre_injection_applied": true,
+    "capability_digest_block_applied": false,
+    "preferences_system_message_count": 0,
+    "host_context_block_applied": false,
+    "memory_recall_system_applied": false,
+    "document_rag_applied": false,
+    "playbook_block_applied": false,
+    "system_prompt_bundled_applied": false,
+    "l8_router_extract": {
+      "prefix_len": 1,
+      "tail_messages_before": 0,
+      "tail_messages_after": 0,
+      "chars_total_after": 179
+    }
+  }
+}

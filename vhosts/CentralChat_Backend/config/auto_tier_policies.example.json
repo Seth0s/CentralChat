@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "tiers": {
+    "economy": { "pick": "first" },
+    "balanced": { "pick": "middle" },
+    "premium": { "pick": "last" }
+  }
+}

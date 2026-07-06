@@ -1,0 +1,8 @@
+{
+  "active_tools": [
+    "web_research",
+    "draft_social_post",
+    "generate_post_image"
+  ],
+  "_comment": "Requires CENTRAL_MODALITY_TOOLS_ENABLED=1. Set MODALITY_AGENT_TOOLS_PATH to this file. Omit path = all modality tools when flag is on."
+}

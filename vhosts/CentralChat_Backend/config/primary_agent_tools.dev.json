@@ -1,0 +1,21 @@
+{
+  "active_tools": [
+    "apply_canvas_patch",
+    "get_host_summary",
+    "list_processes",
+    "list_listening_sockets",
+    "list_disk_usage",
+    "list_disk_partitions",
+    "list_network_interfaces",
+    "get_network_routes",
+    "get_journal_tail",
+    "grep_workspace",
+    "manage_workspace_artifact",
+    "read_file_text",
+    "get_file_metadata",
+    "get_central_stack_health",
+    "request_shell",
+    "create_approval_request"
+  ],
+  "_comment": "Perfil DEV (diagnostico): P0 comuns + request_shell + ponte HITL. Usar via PRIMARY_AGENT_TOOLS_PATH."
+}

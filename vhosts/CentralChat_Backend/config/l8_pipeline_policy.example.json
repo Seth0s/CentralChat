@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "description": "ADR-016 §14 — fallback chain uses model_override on openrouter-main (CLOUD_ROUTER_PROFILE).",
+  "extract": {
+    "router_history_max_messages": 48,
+    "router_history_max_chars": 90000,
+    "audit_digest_max_chars": 8000
+  },
+  "attachments": {
+    "max_count": 8,
+    "max_base64_chars_per_item": 4194304,
+    "max_video_base64_chars": 140000000,
+    "allowed_mime_prefixes": ["image/", "audio/", "video/"]
+  },
+  "handoff": {
+    "merge_required_for_auxiliary": true,
+    "phases_documented": ["primary", "perception_aux", "merged"]
+  },
+  "summarization": {
+    "trigger_messages": 40,
+    "trigger_chars": 60000,
+    "keep_last_messages": 12,
+    "provenance_label": "aux_llm_resolved"
+  },
+  "fallback": {
+    "max_hops": 3,
+    "chain": [
+      { "step": 0, "note": "resolved_primary_profile" },
+      {
+        "step": 1,
+        "router_profile": "cloud_openai",
+        "model_override": "deepseek/deepseek-v4-flash",
+        "note": "adr016_fallback_balanced"
+      },
+      {
+        "step": 2,
+        "router_profile": "cloud_openai",
+        "model_override": "anthropic/claude-sonnet-4.6",
+        "note": "adr016_fallback_premium"
+      }
+    ]
+  },
+  "transport_retry": {
+    "max_attempts": 4,
+    "base_delay_ms": 300,
+    "max_delay_ms": 8000,
+    "jitter_ratio": 0.2,
+    "retry_on_status": [429, 503],
+    "degrade_auto_tier_on_429": false
+  }
+}

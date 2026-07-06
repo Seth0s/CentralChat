@@ -1,7 +1,8 @@
 # CentralChat — Plano Canónico: Context Engine, RAG, Multi-dev e Agent Platform
 
-> **UPDATED:** 2026-06-18  
-> **Status:** Aprovado (decisões de produto e arquitectura) — implementação pendente  
+> **UPDATED:** 2026-06-26  
+> **Status:** EM IMPLEMENTAÇÃO — backend das Ondas 0–5 + AST (H4) + HERMES-ADAPT (H1, H6) concluídos.  
+> **Pendente (14 itens):** UI (3.4), OpenAPI cleanup (3.5), e2e tests (3.6), CLI WI bootstrap (4.7), Timeline API (5.5), Pentest (5.8), SKILL.md migration (AST-6), connector infra (H-2 a H-5)  
 > **Audiência:** engenharia backend, UI, CLI, product  
 > **Origem:** discussões de hardening de agente, unificação de contexto e plataforma multi-dev (2026-06-18)
 
@@ -16,6 +17,8 @@
 | 2026-06-18 | Documento canónico criado: decisões, arquitectura alvo, RAG, multi-dev, AST, roadmap com checklists |
 | 2026-06-18 | Referência a `CLI_RUNTIME_MODES.md` (TEAM híbrido + SOLO) |
 | 2026-06-18 | Referência a `CONTEXT_SECURITY_AND_TRUST.md` |
+| **2026-06-26** | **Onda 0–5 + AST (H4) + HERMES-ADAPT (H1, H6) implementados** |
+| 2026-06-26 | Unificação de tools: `app/tool_catalog.py` como fonte única |
 
 ---
 
@@ -516,16 +519,16 @@ Alinhado a `AST_CONTEXT_DESIGN.md` e decisão D-AST-1:
 
 Aplicar em todas as ondas:
 
-- [ ] DLP pré-prompt (L0)
-- [ ] DLP no ingest RAG/memory
-- [ ] Tenant RLS em todos os retrievals
-- [ ] `trust_level` em todas as secções L5
-- [ ] Role → tool allowlist
-- [ ] Audit por step em `injection_meta`
-- [ ] Métricas: `context_step_duration_ms`, `rag_hit_count`, `compaction_rate`
-- [ ] Timeout gather 150ms/step; fail-open documentado
-- [ ] Golden tests antes de remover legado
-- [ ] `ui_trace` transparente para o utilizador
+- [x] DLP pré-prompt (L0)
+- [x] DLP no ingest RAG/memory
+- [x] Tenant RLS em todos os retrievals
+- [x] `trust_level` em todas as secções L5
+- [x] Role → tool allowlist
+- [x] Audit por step em `injection_meta`
+- [x] Métricas: `context_step_duration_ms`, `rag_hit_count`, `compaction_rate`
+- [x] Timeout gather 150ms/step; fail-open documentado
+- [x] Golden tests antes de remover legado
+- [x] `ui_trace` transparente para o utilizador
 
 ---
 
@@ -535,11 +538,11 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 0.1 | Criar pacote `app/context_engine/` (state, policy, registry) | [ ] |
-| 0.2 | Golden tests baseline `ContextAssembler` / comportamento actual | [ ] |
-| 0.3 | Implementar `ContextPolicy` + `resolve_policy()` | [ ] |
-| 0.4 | Wrapper: `ContextPipeline` → usa registry (sem mudança comportamento) | [ ] |
-| 0.5 | Documentar métricas Prometheus para context steps | [ ] |
+| 0.1 | Criar pacote `app/context_engine/` (state, policy, registry) | [x] |
+| 0.2 | Golden tests baseline `ContextAssembler` / comportamento actual | [x] |
+| 0.3 | Implementar `ContextPolicy` + `resolve_policy()` | [x] |
+| 0.4 | Wrapper: `ContextPipeline` → usa registry (sem mudança comportamento) | [x] |
+| 0.5 | Documentar métricas Prometheus para context steps | [x] |
 
 **Critério de done:** testes verdes; zero regressão no stream.
 
@@ -549,13 +552,13 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 1.1 | `RetrievalOrchestrator` com `asyncio.gather` | [ ] |
-| 1.2 | Steps: SessionRag, DocumentRag, MemoryRecall, ProductRag, Playbook | [ ] |
-| 1.3 | Gates automáticos (tabela §6.2) | [ ] |
-| 1.4 | Campo `active_document_id` em meta de sessão/WI | [ ] |
-| 1.5 | Religar pre-injeção L0 + preferences L2 no pipeline | [ ] |
-| 1.6 | Deprecar flags HTTP (log only) | [ ] |
-| 1.7 | Métricas `rag_hit_count` por kind | [ ] |
+| 1.1 | `RetrievalOrchestrator` com `asyncio.gather` | [x] |
+| 1.2 | Steps: SessionRag, DocumentRag, MemoryRecall, ProductRag, Playbook | [x] |
+| 1.3 | Gates automáticos (tabela §6.2) | [x] |
+| 1.4 | Campo `active_document_id` em meta de sessão/WI | [x] |
+| 1.5 | Religar pre-injeção L0 + preferences L2 no pipeline | [x] |
+| 1.6 | Deprecar flags HTTP (log only) | [x] |
+| 1.7 | Métricas `rag_hit_count` por kind | [x] |
 
 **Critério de done:** session RAG read+write no mesmo request; latência RAG ≤ max(paralelo).
 
@@ -565,12 +568,12 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 2.1 | `CompactionStep` único (absorver legado) | [ ] |
-| 2.2 | tiktoken em `TokenBudgetAllocator` | [ ] |
-| 2.3 | `SchemaTracker` para tools | [ ] |
-| 2.4 | `MergeSectionsStep` ordem L0→L7 | [ ] |
-| 2.5 | `PendingStateStep` (approvals + WI blockers) | [ ] |
-| 2.6 | Remover `include_long_session_memory` do contrato | [ ] |
+| 2.1 | `CompactionStep` único (absorver legado) | [x] |
+| 2.2 | tiktoken em `TokenBudgetAllocator` | [x] |
+| 2.3 | `SchemaTracker` para tools | [x] |
+| 2.4 | `MergeSectionsStep` ordem L0→L7 | [x] |
+| 2.5 | `PendingStateStep` (approvals + WI blockers) | [x] |
+| 2.6 | Remover `include_long_session_memory` do contrato | [x] |
 
 **Critério de done:** uma política de compactação; golden tests de budget.
 
@@ -580,9 +583,9 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 3.1 | Migrar steps restantes de `context.py` | [ ] |
-| 3.2 | Remover `ContextAssembler` do hot path | [ ] |
-| 3.3 | Unificar `agent_tree` no mesmo `ContextEngine` | [ ] |
+| 3.1 | Migrar steps restantes de `context.py` | [x] |
+| 3.2 | Remover `ContextAssembler` do hot path | [x] |
+| 3.3 | Unificar `agent_tree` no mesmo `ContextEngine` | [x] |
 | 3.4 | UI: remover checkboxes memória/RAG; expandir `ui_trace` | [ ] |
 | 3.5 | OpenAPI: request simplificado §12.1 | [ ] |
 | 3.6 | Testes e2e: conversa longa + document upload | [ ] |
@@ -595,12 +598,12 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 4.1 | `work_item_id` no `AssistantTextRequest` + validação tenant | [ ] |
-| 4.2 | `WorkItemContextStep` (L2) | [ ] |
-| 4.3 | Role-scoped `ContextPolicy` (RBAC → tools + layers) | [ ] |
-| 4.4 | Handoff/fork API + audit events | [ ] |
-| 4.5 | Memory namespace `work_item:{id}` + expiração ao fechar WI | [ ] |
-| 4.6 | `session_search` com ACL + filtros team | [ ] |
+| 4.1 | `work_item_id` no `AssistantTextRequest` + validação tenant | [x] |
+| 4.2 | `WorkItemContextStep` (L2) | [x] |
+| 4.3 | Role-scoped `ContextPolicy` (RBAC → tools + layers) | [x] |
+| 4.4 | Handoff/fork API + audit events | [x] |
+| 4.5 | Memory namespace `work_item:{id}` + expiração ao fechar WI | [x] |
+| 4.6 | `session_search` com ACL + filtros team | [x] |
 | 4.7 | CLI: `central work WI-142` com bootstrap contexto | [ ] |
 
 **Critério de done:** dois devs no mesmo WI com handoff; reviewer sem tools write.
@@ -611,13 +614,13 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| 5.1 | File lease por WI (`path_prefix`) | [ ] |
-| 5.2 | Branch sugerida + metadata no WI | [ ] |
-| 5.3 | Stale diff detection pré-approval | [ ] |
-| 5.4 | WI-triggered session bootstrap (ci, policy, tool_failure) | [ ] |
-| 5.5 | Timeline unificada API (WI + session + approval) | [ ] |
-| 5.6 | DLP no ingest session facts | [ ] |
-| 5.7 | `ContextPolicy` por tenant em PG | [ ] |
+| 5.1 | File lease por WI (`path_prefix`) | [x] |
+| 5.2 | Branch sugerida + metadata no WI | [x] |
+| 5.3 | Stale diff detection pré-approval | [x] |
+| 5.4 | WI-triggered session bootstrap (ci, policy, tool_failure) | [x] |
+| 5.5 | Timeline unificada API (WI + session + approval) | [x] |
+| 5.6 | DLP no ingest session facts | [x] |
+| 5.7 | `ContextPolicy` por tenant em PG | [x] |
 | 5.8 | Pentest interno: document upload prompt injection | [ ] |
 
 **Critério de done:** policy.violation → WI → sessão automática; lease impede clobber documentado.
@@ -628,13 +631,13 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| AST-1 | Schema `ast_nodes` + migrations | [ ] |
-| AST-2 | Parser Python (walk + ast.parse) | [ ] |
-| AST-3 | Upsert com `source_hash` + hook git | [ ] |
-| AST-4 | `POST /ast/query` + graph expansion | [ ] |
-| AST-5 | Tool `ask_project` no Tier-0 | [ ] |
+| AST-1 | Schema `ast_nodes` + migrations | [x] |
+| AST-2 | Parser Python (walk + ast.parse) | [x] |
+| AST-3 | Upsert com `source_hash` + hook git | [x] |
+| AST-4 | `POST /ast/query` + graph expansion | [x] |
+| AST-5 | Tool `ask_project` no Tier-0 | [x] |
 | AST-6 | Migrar 10–15 convenções críticas da SKILL | [ ] |
-| AST-7 | Testes: query não vaza tenant | [ ] |
+| AST-7 | Testes: query não vaza tenant | [x] |
 
 ---
 
@@ -642,12 +645,12 @@ Aplicar em todas as ondas:
 
 | # | Tarefa | Done |
 |---|--------|------|
-| H-1 | Vector RAG para tool selection (unificar com `rag.py`) | [ ] |
+| H-1 | Vector RAG para tool selection (unificar com `rag.py`) | [x] |
 | H-2 | `execute_code` via connector job type | [ ] |
 | H-3 | `delegate_task` com `work_item_id` + policy intersect | [ ] |
 | H-4 | MCP server registry + policy filter | [ ] |
 | H-5 | LSP diagnostics pós-patch (connector) | [ ] |
-| H-6 | Environment gates (WI labels → skill relevance) | [ ] |
+| H-6 | Environment gates (WI labels → skill relevance) | [x] |
 
 ---
 
@@ -666,16 +669,16 @@ Aplicar em todas as ondas:
 
 ## 18. Definition of Done — programa completo
 
-- [ ] Um único `assemble_context()` no hot path
-- [ ] Zero flags `include_*` no contrato público
-- [ ] RAG L5 read+write coerente (session, document, memory)
-- [ ] WI como L2 quando `work_item_id` presente
-- [ ] Handoff auditável entre devs
-- [ ] Role-scoped tools e contexto
-- [ ] `ContextPolicy` configurável por tenant (PG)
-- [ ] Golden + e2e verdes em CI
-- [ ] `ui_trace` documentado para UI/CLI
-- [ ] AST `ask_project` em staging (H4)
+- [x] Um único `assemble_context()` no hot path
+- [ ] Zero flags `include_*` no contrato público (deprecated, ainda presentes no modelo)
+- [x] RAG L5 read+write coerente (session, document, memory)
+- [x] WI como L2 quando `work_item_id` presente
+- [x] Handoff auditável entre devs
+- [x] Role-scoped tools e contexto
+- [x] `ContextPolicy` configurável por tenant (PG)
+- [ ] Golden + e2e verdes em CI (golden ok, e2e pendente)
+- [x] `ui_trace` documentado para UI/CLI
+- [x] AST `ask_project` em staging (H4)
 - [ ] Pentest document upload sem bypass crítico
 
 ---

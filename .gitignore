@@ -1,3 +1,49 @@
-# CentralChat Infra — gitignore
-# vhosts/ contém repositórios clonados (clone-pull.sh)
-vhosts/
+# CentralChat — gitignore
+
+# Dependencies
+node_modules/
+vendor/
+
+# Secrets & environment
+.env
+.env.local
+.env.docker
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# Build outputs
+dist/
+build/
+.gradle/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime
+*.log
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+coverage/
+
+# Docker volumes
+volumes/
+data/
+postgres-data/
+
+# Binaries
+central
+*.exe

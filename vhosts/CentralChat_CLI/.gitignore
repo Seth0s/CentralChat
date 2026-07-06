@@ -1,0 +1,6 @@
+/central
+*.exe
+.env
+config.toml
+.DS_Store
+.pytest_cache/

@@ -1,0 +1,13 @@
+{
+  "active_tools": [
+    "apply_canvas_patch",
+    "manage_workspace_artifact",
+    "request_shell",
+    "client_read_file",
+    "client_grep",
+    "web_research",
+    "draft_social_post",
+    "generate_post_image"
+  ],
+  "_comment": "ADR-017 tenant widget default: client + cloud only. Platform/HITL-meta tools: CENTRAL_LEGACY_PLATFORM_TOOLS=1 and primary_agent_tools.dev.json via PRIMARY_AGENT_TOOLS_PATH."
+}

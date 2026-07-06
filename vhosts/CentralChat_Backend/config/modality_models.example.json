@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "description": "Capacidades fixas no servidor (ADR-016). Não confundir com cloud_models_allowlist.json (picker UI). IDs canónicos OpenRouter — validar em https://openrouter.ai/models",
+  "production": {
+    "summary": "google/gemini-2.5-flash-lite",
+    "vision_perceive": "google/gemini-2.5-flash-lite",
+    "audio_perceive": "google/gemini-2.5-flash-lite",
+    "tts": "openai/gpt-4o-mini-tts-2025-12-15",
+    "web_research_fast": "perplexity/sonar",
+    "web_research_default": "perplexity/sonar-pro",
+    "web_research_deep": "perplexity/sonar-deep-research",
+    "social_copy": "x-ai/grok-4.1-fast",
+    "social_copy_premium": "google/gemini-2.5-flash",
+    "image_generate": "google/gemini-2.5-flash-image",
+    "video_perceive": "qwen/qwen3.6-flash",
+    "ocr_dense": "baidu/qianfan-ocr-fast"
+  },
+  "development": {
+    "summary": "google/gemma-4-26b-a4b-it:free",
+    "vision_perceive": "google/gemma-4-26b-a4b-it:free",
+    "audio_perceive": "google/gemma-4-26b-a4b-it:free",
+    "tts": "openai/gpt-4o-mini-tts-2025-12-15",
+    "web_research_default": "perplexity/sonar",
+    "social_copy": "x-ai/grok-4.1-fast",
+    "image_generate": "google/gemini-2.5-flash-image"
+  }
+}

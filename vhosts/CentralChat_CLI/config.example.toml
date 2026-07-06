@@ -1,0 +1,3 @@
+api_url = "http://127.0.0.1:8004"
+connector_id = "local-dev"
+web_diff_min_lines = 100
